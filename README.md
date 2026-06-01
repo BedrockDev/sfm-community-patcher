@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎬 SFM Community Patcher v2.5
+# 🎬 SFM Community Patcher v2.6
 
 ### *Engine stability, memory limits & Vulkan graphics for Source Filmmaker*
 
@@ -39,6 +39,9 @@
 | **RBTree Index** | `CUtlRBTree overflow!` | `bin\engine.dll` |
 | **Console Flags** | `FCVAR_CHEAT` command restrictions | `bin\engine.dll` |
 | **KeyValues Pool** | `Out of keyvalue string space` | `bin\vstdlib.dll` |
+| **Map Brushes** | `Map has too many brushes` | `bin\engine.dll` (8192 → 16384) |
+| **Map Planes** | `Map has too many planes` | `bin\engine.dll` (65536 → 131072) |
+| **Edicts** *(experimental)* | `ED_Alloc: no free edicts` | `step08` — **excluded** from default menu |
 | **Graphics Chain** | ReShade + DXVK `d3d9.dll` conflict | `bin\ReShade.ini` → `[PROXY]` |
 
 ---
@@ -75,6 +78,9 @@ SourceFilmmaker\game\
     ├── step03_rbtree_overflow.py
     ├── step04_fcv_flags.py
     ├── step05_keyvalue_string_space.py
+    ├── step06_map_brush_limit.py
+    ├── step07_map_plane_limit.py
+    ├── step08_edict_limit.py      # Manual only (not in patch_sfm menu 1)
     ├── lib\                       # Binary patch engine
     │   ├── binary_patch.py
     │   ├── patch_defs.py
@@ -119,6 +125,8 @@ py -3 sfm_patcher\step02_hunk_overflow.py
 py -3 sfm_patcher\step03_rbtree_overflow.py
 py -3 sfm_patcher\step04_fcv_flags.py
 py -3 sfm_patcher\step05_keyvalue_string_space.py
+py -3 sfm_patcher\step06_map_brush_limit.py
+py -3 sfm_patcher\step07_map_plane_limit.py
 py -3 sfm_patcher\configure_reshade_dxvk.py
 ```
 
@@ -126,7 +134,7 @@ py -3 sfm_patcher\configure_reshade_dxvk.py
 
 | Key | Action |
 |-----|--------|
-| `1` | Apply all patches (`--skip-dxvk`) |
+| `1` | Apply engine patches (`--skip-dxvk --skip-edicts`) |
 | `2` | Dry-run preview |
 | `3` | Restore from `bin\backups\` |
 | `5` | ReShade + DXVK setup only |
