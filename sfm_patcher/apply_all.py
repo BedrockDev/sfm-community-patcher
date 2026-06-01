@@ -21,6 +21,9 @@ STEPS = [
     "step03_rbtree_overflow.py",
     "step04_fcv_flags.py",
     "step05_keyvalue_string_space.py",
+    "step06_map_brush_limit.py",
+    "step07_map_plane_limit.py",
+    "step08_edict_limit.py",
 ]
 
 
@@ -29,10 +32,17 @@ def main() -> None:
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--restore", action="store_true")
     parser.add_argument("--skip-dxvk", action="store_true", help="Skip step 1 (DXVK)")
+    parser.add_argument(
+        "--skip-edicts",
+        action="store_true",
+        help="Skip step 8 (experimental edict limit)",
+    )
     args = parser.parse_args()
 
     py = sys.executable
     steps = [s for s in STEPS if not (args.skip_dxvk and s.startswith("step01"))]
+    if args.skip_edicts:
+        steps = [s for s in steps if not s.startswith("step08")]
     extra = []
     if args.dry_run:
         extra.append("--dry-run")

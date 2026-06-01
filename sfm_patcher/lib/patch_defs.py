@@ -33,9 +33,9 @@ HUNK_PATCHES: list[SignaturePatch] = [
     ),
     SignaturePatch(
         patch_id="hunk_init_defaults",
-        description="Стартовый hunk: push 32MB + mov 48MB → push 256MB + mov 1GB",
+        description="Стартовый hunk: push 32MB + mov 48MB → push 256MB + mov 256MB",
         old=bytes.fromhex("68 00 00 00 02 68 00 00 01 00 BE 00 00 00 03"),
-        new=bytes.fromhex("68 00 00 00 10 68 00 00 01 00 BE 00 00 00 40"),
+        new=bytes.fromhex("68 00 00 00 10 68 00 00 01 00 BE 00 00 00 10"),
         max_occurrences=1,
     ),
     SignaturePatch(
@@ -72,6 +72,71 @@ KEYVALUE_STRING_PATCHES: list[SignaturePatch] = [
         ),
         old=bytes.fromhex("3B 57 08 77 3B"),
         new=bytes.fromhex("3B 57 08 90 90"),
+        max_occurrences=1,
+    ),
+]
+
+# --- Шаг 6: Map brush limit (engine.dll) ------------------------------------
+
+MAP_BRUSH_PATCHES: list[SignaturePatch] = [
+    SignaturePatch(
+        patch_id="map_brushes_8k_to_16k",
+        description="CMod_LoadBrushes: cmp brush count 8192 → 16384",
+        old=bytes.fromhex("81 FE 00 20 00 00 7E 0D"),
+        new=bytes.fromhex("81 FE 00 40 00 00 7E 0D"),
+        max_occurrences=1,
+    ),
+]
+
+# --- Шаг 7: Map plane limit (engine.dll) ------------------------------------
+
+EDICT_PATCHES: list[SignaturePatch] = [
+    # 4096 — safe: init + side malloc only (no cmp/mov hard-patches)
+    SignaturePatch(
+        patch_id="max_edicts_init_2k_to_4k",
+        description="SV init: max edicts 2048 → 4096 at sv+0x218",
+        old=bytes.fromhex("B8 00 08 00 00 89 86 18 02 00 00 A3 18 25 40 10"),
+        new=bytes.fromhex("B8 00 10 00 00 89 86 18 02 00 00 A3 18 25 40 10"),
+        max_occurrences=1,
+    ),
+    SignaturePatch(
+        patch_id="max_edicts_init_8k_to_4k",
+        description="SV init: max edicts 8192 → 4096 (downgrade from failed test)",
+        old=bytes.fromhex("B8 00 20 00 00 89 86 18 02 00 00 A3 18 25 40 10"),
+        new=bytes.fromhex("B8 00 10 00 00 89 86 18 02 00 00 A3 18 25 40 10"),
+        max_occurrences=1,
+    ),
+    SignaturePatch(
+        patch_id="edict_side_table_2k_to_16k",
+        description="ED_Alloc helper: side malloc 0x2000 → 0x4000 bytes (4096 slots)",
+        old=bytes.fromhex("68 00 20 00 00 6A 00 68 28 5A 66 10"),
+        new=bytes.fromhex("68 00 40 00 00 6A 00 68 28 5A 66 10"),
+        max_occurrences=1,
+    ),
+    SignaturePatch(
+        patch_id="edict_side_table_8k_to_16k",
+        description="ED_Alloc helper: side malloc 0x8000 → 0x4000 (downgrade)",
+        old=bytes.fromhex("68 00 80 00 00 6A 00 68 28 5A 66 10"),
+        new=bytes.fromhex("68 00 40 00 00 6A 00 68 28 5A 66 10"),
+        max_occurrences=1,
+    ),
+]
+
+# --- Шаг 7: Map plane limit (engine.dll) ------------------------------------
+
+MAP_PLANE_PATCHES: list[SignaturePatch] = [
+    SignaturePatch(
+        patch_id="map_planes_cmp_edi_64k_to_128k",
+        description="CMod_LoadPlanes: cmp edi, 65536 → 131072 (before Host_Error)",
+        old=bytes.fromhex("81 FF 00 00 01 00 7E 0D"),
+        new=bytes.fromhex("81 FF 00 00 02 00 7E 0D"),
+        max_occurrences=3,
+    ),
+    SignaturePatch(
+        patch_id="map_planes_cmp_eax_64k_to_128k",
+        description="CMod_LoadPlanes: cmp eax, 65536 → 131072",
+        old=bytes.fromhex("3D 00 00 01 00 7E 0D"),
+        new=bytes.fromhex("3D 00 00 02 00 7E 0D"),
         max_occurrences=1,
     ),
 ]
