@@ -20,7 +20,7 @@ title SFM Community Patcher
 
 echo.
 
-echo  === SFM Community Patcher v2.5 ===
+echo  === SFM Community Patcher v2.6 ===
 
 echo  Folder: %CD%
 
@@ -122,7 +122,8 @@ if "%CHOICE%"=="3" (
 
 
 REM Step 1 (d3d9_vlk string) breaks ReShade PROXY — engine patches only
-py -3 sfm_patcher\apply_all.py --skip-dxvk
+REM Step 8 (edicts) crashes light maps — use only for heavy maps manually
+py -3 sfm_patcher\apply_all.py --skip-dxvk --skip-edicts
 
 if errorlevel 1 (
 
