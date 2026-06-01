@@ -1,4 +1,4 @@
-# SFM Community Patcher — Installation Guide
+# SFM Community Patcher v2.6 — Installation Guide
 
 An all-in-one optimization patcher for **Source Filmmaker** (Steam). It automatically expands internal engine memory limits, prevents frequent memory crashes, and configures an advanced **DXVK (Vulkan)** + **ReShade** graphics pipeline for maximum stability and visual fidelity.
 
@@ -13,6 +13,10 @@ An all-in-one optimization patcher for **Source Filmmaker** (Steam). It automati
 | **Command Bypass** | Unlocks restricted cinematic console commands without forcing cheat flags or breaking engine compliance. |
 | **Vulkan API Render** | Translates outdated Direct3D 9 to modern Vulkan via DXVK, eliminating micro-stutters and boosting performance. |
 | **ReShade Seamless Integration** | Allows you to use modern post-processing effects directly inside the upgraded engine viewport. |
+| **KeyValues String Pool** | Fixes `Out of keyvalue string space` on heavy scenes (`vstdlib.dll`). |
+| **Map Brush Limit** | Raises load-time brush cap from **8192 → 16384** (`Map has too many brushes`). Does **not** change VBSP compile limits. |
+| **Map Plane Limit** | Raises load-time plane cap from **65536 → 131072** (`Map has too many planes`). VBSP compile limits unchanged. |
+| **Edicts** | Step08 **not** in menu option 1 (experimental; may break lightmaps). GMod maps with 3000+ ents need Hammer trim. |
 
 > **Safety Note:** All modifications are applied as precise byte-level edits. PE file sizes remain untouched. Unmodified original Steam DLLs are safely backed up to the `bin\backups\` directory automatically upon the first run.
 
@@ -43,7 +47,8 @@ SourceFilmmaker\game
 ## Step 2. Install Graphics Components (DXVK & ReShade)
 
 1. **DXVK:** Download the latest **DXVK** release (32-bit build, `x32` folder). Copy `d3d9.dll` from the archive into your `game\bin\` directory and rename it to **`d3d9_vlk.dll`**.
-2. **ReShade:** Install ReShade for Source Filmmaker targeting Direct3D 9. Ensure that the original ReShade `d3d9.dll` file is successfully generated inside your `game\bin\` folder.
+2. **ReShade:** Install ReShade targeting **`game\bin\dmxedit.exe`** (Direct3D 9, **32-bit** — not `sfm.exe`). Ensure `game\bin\d3d9.dll` exists.
+3. After patching, run **`setup_reshade_dxvk.bat`** once so `bin\ReShade.ini` contains `[PROXY] ProxyLibrary=d3d9_vlk.dll`.
 
 ---
 
