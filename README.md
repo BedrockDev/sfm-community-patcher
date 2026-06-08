@@ -4,7 +4,7 @@
 
 ### *Engine stability, memory limits & Vulkan graphics for Source Filmmaker*
 
-**Axiom Kinetic Studios** · **BedrockSFM**
+**Limina Flow** · **BedrockSFM**
 
 <br>
 
@@ -203,7 +203,7 @@ Re-run **`setup_reshade_dxvk.bat`** after reinstalling ReShade, as updates may r
 
 **MIT License**
 
-Copyright (c) 2026 **BedrockSFM**, **Axiom Kinetic Studios**
+Copyright (c) 2026 **BedrockSFM**, **Limina Flow**
 
 See [LICENSE](LICENSE) for the full text.
 
