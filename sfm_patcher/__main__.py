@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-SFM Community Patcher v3.0 — Entry point.
+SFM Community Patcher v3.2 — Entry point.
 
 Usage:
     python -m sfm_patcher          # Launch GUI
@@ -14,7 +14,7 @@ import sys
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="SFM Community Patcher v3.0")
+    parser = argparse.ArgumentParser(description="SFM Community Patcher v3.2")
     parser.add_argument("--cli", action="store_true", help="Run in CLI mode")
     parser.add_argument("--bin-dir", default=None, help="Path to SFM bin directory")
     parser.add_argument("--dry-run", action="store_true", help="Preview only")

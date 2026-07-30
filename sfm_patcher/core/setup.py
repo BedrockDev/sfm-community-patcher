@@ -46,7 +46,12 @@ class SetupConfig:
     game_dir: str = ""
     install_dxvk: bool = True
     install_reshade: bool = True
-    apply_patches: bool = True
+    apply_hunk: bool = True
+    apply_rbtree: bool = True
+    apply_fcvar: bool = True
+    apply_keyvalues: bool = True
+    apply_brushes: bool = True
+    apply_planes: bool = True
     apply_edicts: bool = False
     dry_run: bool = False
 
@@ -205,36 +210,38 @@ def run_setup(
             result.errors.append(msg)
 
     # Step 5: Apply engine patches
-    if config.apply_patches:
-        log("\n=== Step 5: Engine patches ===")
-        try:
-            step_defs = [
-                ("step02_hunk_overflow", "engine.dll", HUNK_PATCHES, b"Engine hunk overflow!"),
-                ("step03_rbtree_overflow", "engine.dll", RBTREE_PATCHES, b"CUtlRBTree overflow!"),
-                ("step04_fcv_flags", "engine.dll", FCVAR_PATCHES, b"FCVAR_CHEAT"),
-                ("step05_keyvalue_string_space", "vstdlib.dll", KEYVALUE_STRING_PATCHES, b"keyvalue string"),
-                ("step06_map_brush_limit", "engine.dll", MAP_BRUSH_PATCHES, b"too many brushes"),
-                ("step07_map_plane_limit", "engine.dll", MAP_PLANE_PATCHES, b"too many planes"),
-            ]
-            if config.apply_edicts:
-                step_defs.append(
-                    ("step08_edict_limit", "engine.dll", EDICT_PATCHES, b"no free edicts")
-                )
+    log("\n=== Step 5: Engine patches ===")
+    step_defs = []
+    if config.apply_hunk:
+        step_defs.append(("step02_hunk_overflow", "engine.dll", HUNK_PATCHES, b"Engine hunk overflow!"))
+    if config.apply_rbtree:
+        step_defs.append(("step03_rbtree_overflow", "engine.dll", RBTREE_PATCHES, b"CUtlRBTree overflow!"))
+    if config.apply_fcvar:
+        step_defs.append(("step04_fcv_flags", "engine.dll", FCVAR_PATCHES, b"FCVAR_CHEAT"))
+    if config.apply_keyvalues:
+        step_defs.append(("step05_keyvalue_string_space", "vstdlib.dll", KEYVALUE_STRING_PATCHES, b"keyvalue string"))
+    if config.apply_brushes:
+        step_defs.append(("step06_map_brush_limit", "engine.dll", MAP_BRUSH_PATCHES, b"too many brushes"))
+    if config.apply_planes:
+        step_defs.append(("step07_map_plane_limit", "engine.dll", MAP_PLANE_PATCHES, b"too many planes"))
+    if config.apply_edicts:
+        step_defs.append(("step08_edict_limit", "engine.dll", EDICT_PATCHES, b"no free edicts"))
 
-            for step_name, target_file, patches, err_str in step_defs:
-                log(f"\n>>> {step_name}")
-                try:
-                    count = _patch_binary(bin_dir, target_file, patches, err_str, log, config.dry_run)
-                    result.patches_applied += 1 if count > 0 or config.dry_run else 0
-                except PatchError as e:
-                    log(f"WARNING: {step_name} failed: {e}")
-                except Exception as e:
-                    log(f"WARNING: {step_name} error: {e}")
+    try:
+        for step_name, target_file, patches, err_str in step_defs:
+            log(f"\n>>> {step_name}")
+            try:
+                count = _patch_binary(bin_dir, target_file, patches, err_str, log, config.dry_run)
+                result.patches_applied += 1 if count > 0 or config.dry_run else 0
+            except PatchError as e:
+                log(f"WARNING: {step_name} failed: {e}")
+            except Exception as e:
+                log(f"WARNING: {step_name} error: {e}")
 
-        except Exception as e:
-            msg = f"Patching failed: {e}"
-            log(f"ERROR: {msg}")
-            result.errors.append(msg)
+    except Exception as e:
+        msg = f"Patching failed: {e}"
+        log(f"ERROR: {msg}")
+        result.errors.append(msg)
 
     # Summary
     log("\n" + "=" * 50)
@@ -242,7 +249,7 @@ def run_setup(
     log(f"SFM: {result.sfm_path}")
     log(f"DXVK: {'OK' if result.dxvk_installed else 'Skipped'}")
     log(f"ReShade: {'OK' if result.reshade_installed else 'Skipped'}")
-    total_steps = len(step_defs) if config.apply_patches else 0
+    total_steps = len(step_defs)
     log(f"Patches: {result.patches_applied}/{total_steps}")
     if result.errors:
         log(f"Errors: {len(result.errors)}")

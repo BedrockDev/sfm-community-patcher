@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-About window for SFM Community Patcher v3.0.
+About window for SFM Community Patcher v3.2.
 """
 
 from __future__ import annotations
@@ -97,7 +97,7 @@ class AboutWindow:
             bg=BG, fg=FG,
         ).pack(pady=(0, 2))
         tk.Label(
-            root, text="Version 3.0", font=("Segoe UI", 11),
+            root, text="Version 3.2", font=("Segoe UI", 11),
             bg=BG, fg=ACCENT,
         ).pack(pady=(0, 12))
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-SFM Community Patcher v3.0 — Main GUI Application.
+SFM Community Patcher v3.2 — Main GUI Application.
 """
 
 from __future__ import annotations
@@ -13,6 +13,7 @@ from tkinter import filedialog, messagebox
 from typing import Optional
 
 from .about import AboutWindow
+from .bug_report import BugReportWindow
 from .log_widget import LogWidget
 from .styles import (
     ACCENT, ACCENT_HOVER, BG, BG_SECONDARY, BG_INPUT, BORDER,
@@ -31,7 +32,7 @@ from core.setup import SetupConfig, SetupResult, run_setup
 class App:
     def __init__(self) -> None:
         self.root = tk.Tk()
-        self.root.title("SFM Community Patcher v3.0")
+        self.root.title("SFM Community Patcher v3.2")
         self.root.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
         self.root.configure(bg=BG)
         self.root.resizable(False, False)
@@ -106,23 +107,52 @@ class App:
 
         self.dxvk_var = tk.BooleanVar(value=True)
         self.reshade_var = tk.BooleanVar(value=True)
-        self.patches_var = tk.BooleanVar(value=True)
+        self.hunk_var = tk.BooleanVar(value=True)
+        self.rbtree_var = tk.BooleanVar(value=True)
+        self.fcvar_var = tk.BooleanVar(value=True)
+        self.keyvalues_var = tk.BooleanVar(value=True)
+        self.brushes_var = tk.BooleanVar(value=True)
+        self.planes_var = tk.BooleanVar(value=True)
         self.edicts_var = tk.BooleanVar(value=False)
 
         checks = [
-            ("Install DXVK (Vulkan renderer)", self.dxvk_var),
-            ("Install ReShade (post-processing effects)", self.reshade_var),
-            ("Apply engine patches (hunk, rbtree, etc.)", self.patches_var),
-            ("Experimental: edict limit (risky, can break lightmaps)", self.edicts_var),
+            ("Install DXVK (Vulkan renderer)", self.dxvk_var, None),
+            ("Install ReShade (post-processing)", self.reshade_var, None),
         ]
-        for text, var in checks:
-            cb = tk.Checkbutton(
+        for text, var, _ in checks:
+            tk.Checkbutton(
                 options_frame, text=text, variable=var,
                 font=FONT_LABEL, bg=BG, fg=FG,
                 selectcolor=BG_INPUT, activebackground=BG, activeforeground=FG,
                 highlightthickness=0,
+            ).pack(anchor=tk.W, pady=1)
+
+        tk.Frame(options_frame, bg=BORDER, height=1).pack(fill=tk.X, pady=(6, 4))
+        tk.Label(options_frame, text="Engine patches:", font=FONT_SMALL, bg=BG, fg=FG_DIM).pack(anchor=tk.W)
+
+        patches = [
+            ("Hunk memory (256 MB / 2 GB)", self.hunk_var, "Fixes 'Engine hunk overflow'. Safe."),
+            ("RBTree index limit", self.rbtree_var, "Fixes 'CUtlRBTree overflow'. May cause random crashes."),
+            ("FCVAR_CHEAT bypass", self.fcvar_var, "Unlocks cheat commands. Safe."),
+            ("KeyValues string pool", self.keyvalues_var, "Fixes 'Out of keyvalue string space'. Safe."),
+            ("Map brushes (16k)", self.brushes_var, "Fixes 'too many brushes'. Safe."),
+            ("Map planes (128k)", self.planes_var, "Fixes 'too many planes'. Safe."),
+            ("Edict limit (experimental)", self.edicts_var, "DANGER: can break lightmaps and cause crashes."),
+        ]
+        for text, var, tip in patches:
+            f = tk.Frame(options_frame, bg=BG)
+            f.pack(anchor=tk.W, pady=1)
+            cb = tk.Checkbutton(
+                f, text=text, variable=var,
+                font=FONT_LABEL, bg=BG, fg=FG,
+                selectcolor=BG_INPUT, activebackground=BG, activeforeground=FG,
+                highlightthickness=0,
             )
-            cb.pack(anchor=tk.W, pady=2)
+            cb.pack(side=tk.LEFT)
+            if tip:
+                warn_color = "#f38ba8" if "DANGER" in tip or "crash" in tip.lower() else FG_DIM
+                tk.Label(f, text="(!)", font=FONT_SMALL, bg=BG, fg=warn_color, cursor="hand2").pack(side=tk.LEFT, padx=(4, 0))
+                tk.Label(f, text=tip, font=("Segoe UI", 7), bg=BG, fg=FG_DIM).pack(side=tk.LEFT, padx=(4, 0))
 
         # Buttons
         btn_frame = tk.Frame(main, bg=BG)
@@ -160,6 +190,22 @@ class App:
             command=self._show_about,
         )
         self.about_btn.pack(side=tk.LEFT, padx=(8, 0))
+
+        self.diag_btn = tk.Button(
+            btn_frame, text="Diagnostics", font=FONT_SMALL,
+            bg=BG_SECONDARY, fg=FG_DIM, activebackground=BORDER, activeforeground=FG,
+            relief=tk.FLAT, padx=8, pady=2, cursor="hand2",
+            command=self._show_diagnostics,
+        )
+        self.diag_btn.pack(side=tk.LEFT, padx=(4, 0))
+
+        self.bug_btn = tk.Button(
+            btn_frame, text="Bug Report", font=FONT_SMALL,
+            bg=BG_SECONDARY, fg="#f38ba8", activebackground=BORDER, activeforeground="#f38ba8",
+            relief=tk.FLAT, padx=8, pady=2, cursor="hand2",
+            command=self._show_bug_report,
+        )
+        self.bug_btn.pack(side=tk.LEFT, padx=(4, 0))
 
         self.status_bottom = tk.Label(
             btn_frame, text="Ready", font=("Segoe UI", 9),
@@ -211,7 +257,12 @@ class App:
             game_dir=path,
             install_dxvk=self.dxvk_var.get(),
             install_reshade=self.reshade_var.get(),
-            apply_patches=self.patches_var.get(),
+            apply_hunk=self.hunk_var.get(),
+            apply_rbtree=self.rbtree_var.get(),
+            apply_fcvar=self.fcvar_var.get(),
+            apply_keyvalues=self.keyvalues_var.get(),
+            apply_brushes=self.brushes_var.get(),
+            apply_planes=self.planes_var.get(),
             apply_edicts=self.edicts_var.get(),
             dry_run=dry_run,
         )
@@ -297,6 +348,41 @@ class App:
 
     def _show_about(self) -> None:
         AboutWindow(self.root)
+
+    def _show_diagnostics(self) -> None:
+        self.log_widget.clear()
+        self.log_widget.append("Collecting diagnostics...", "accent")
+
+        def _worker():
+            try:
+                from core.diagnostics import collect_diagnostics, format_diagnostics
+                info = collect_diagnostics(self.path_var.get().strip())
+                report = format_diagnostics(info)
+                self.root.after(0, lambda: self._show_diag_report(report))
+            except Exception as import_exc:
+                self.root.after(0, lambda: self.log_widget.append("ERROR: " + str(import_exc), "error"))
+
+        threading.Thread(target=_worker, daemon=True).start()
+
+    def _show_diag_report(self, report: str) -> None:
+        self.log_widget.clear()
+        for line in report.split("\n"):
+            if not line.strip():
+                continue
+            if line.startswith("==="):
+                self.log_widget.append(line, "accent")
+            elif line.startswith("  "):
+                self.log_widget.append(line, "dim")
+            elif "?" in line or "NOT FOUND" in line or "No" in line:
+                self.log_widget.append(line, "warning")
+            elif "Yes" in line or "Patches:" in line:
+                self.log_widget.append(line, "success")
+            else:
+                self.log_widget.append(line, "info")
+        self.log_widget.append("\nSelect all and copy (Ctrl+A, Ctrl+C) for bug reports.", "dim")
+
+    def _show_bug_report(self) -> None:
+        BugReportWindow(self.root, self.path_var.get().strip())
 
     def run(self) -> None:
         self.root.mainloop()
