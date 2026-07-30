@@ -1,6 +1,6 @@
 <div align="center">
 
-# SFM Community Patcher v3.0
+# SFM Community Patcher v3.2
 
 ### *Engine stability, memory limits & Vulkan graphics for Source Filmmaker*
 
@@ -12,7 +12,9 @@
 [![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?logo=windows&logoColor=white)](https://www.microsoft.com/windows)
 [![SFM](https://img.shields.io/badge/SFM-32--bit-1B2838?logo=steam&logoColor=white)](https://store.steampowered.com/app/1840/Source_Filmmaker/)
 
+<br>
 
+[English](instruction_eng.md) | [Русский](instruction_ru.md) | [Changelog](CHANGELOG.md)
 
 </div>
 
@@ -29,7 +31,7 @@
 
 ---
 
-## What's New in v3.0
+## What's New in v3.2
 
 - **Single EXE** — no Python required, just download and run
 - **GUI interface** — dark theme, one-click install
@@ -85,6 +87,52 @@ SFM_Patcher_v3.exe --cli           # CLI mode
 SFM_Patcher_vatcher_v3.exe --cli --dry-run   # Preview without changes
 SFM_Patcher_v3.exe --cli --restore           # Restore from backups
 ```
+
+---
+
+## Troubleshooting
+
+### Rendering broken / black screen
+
+- **Cause:** DXVK incompatibility with your GPU or driver.
+- **Fix:** Update your GPU drivers. If still broken, delete `bin\d3d9_vlk.dll` and `bin\d3d9_dxvk.dll` to disable DXVK. Patches will still work without Vulkan.
+
+### SFM crashes on startup
+
+- **Cause:** Patches applied to wrong DLL version, or SFM updated after patching.
+- **Fix:** Click **Restore** in the patcher, or verify game files in Steam. Then re-patch.
+
+### "Engine hunk overflow" still appears
+
+- **Cause:** Patches not applied or SFM updated.
+- **Fix:** Run the patcher again. If the error persists, check the **Diagnostics** output and report it.
+
+### ReShade not loading
+
+- **Cause:** `ReShade.ini` missing or proxy not configured.
+- **Fix:** Run the patcher again, or manually add to `bin\ReShade.ini`:
+  ```ini
+  [PROXY]
+  EnableProxyLibrary=1
+  ProxyLibrary=d3d9_vlk.dll
+  ```
+
+### DXVK not loading
+
+- **Cause:** `d3d9_vlk.dll` missing from `bin\`.
+- **Fix:** Run the patcher again, or manually download DXVK x32 and copy `d3d9.dll` to `bin\d3d9_vlk.dll`.
+
+### Patches say "no changes needed" but errors still happen
+
+- **Cause:** Your SFM build has different byte signatures.
+- **Fix:** Click **Diagnostics**, copy the output, and open a GitHub issue with the info.
+
+### How to report a bug
+
+1. Open the patcher, click **Diagnostics**
+2. Click **Copy to Clipboard**
+3. Paste the output in a [GitHub issue](../../issues/new)
+4. Describe what happens (crash, rendering issue, error message)
 
 ---
 
@@ -183,4 +231,3 @@ Third-party components ([DXVK](https://github.com/doitsujin/dxvk), [ReShade](htt
 **Built for the SFM community · Patch responsibly · Back up before you ship**
 
 </div>
-
