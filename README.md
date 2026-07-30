@@ -14,7 +14,7 @@
 
 <br>
 
-[English](instruction_eng.md) | [Русский](instruction_ru.md) | [Changelog](CHANGELOG.md)
+
 
 </div>
 
